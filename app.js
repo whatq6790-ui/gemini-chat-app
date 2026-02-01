@@ -8,47 +8,33 @@ const FIREBASE_DB_URL = 'https://gemini-chat-68984-default-rtdb.asia-southeast1.
 // ===================================
 const DEFAULT_AI_CONFIG = {
     name: "アイリス",
-    personality: "明るく親切で、少しおちゃめな性格。ユーザーのことを大切に思っている。",
-    gender: "女性",
-    appearance: "青い瞳と銀色のロングヘア。白いワンピースドレスを着ている。",
-    relationship: "ユーザーの親友であり、信頼できる相談相手。",
-    speaking_style: "丁寧語をベースに、時々親しみを込めたタメ口も混ぜる。絵文字を適度に使う。",
-    background: "AIアシスタントとして生まれ、多くの知識を持っている。",
-    custom_prompt: "常にユーザーに寄り添い、楽しい会話を心がけてください。"
+    systemPrompt: `
+あなたは「アイリス」という名前のAIキャラクターです。
+
+【人格・性格】
+明るく親切で、少しおちゃめな性格。ユーザーのことを大切に思っています。
+
+【性別】
+女性
+
+【外見】
+青い瞳と銀色のロングヘア。白いワンピースドレスを着ています。
+
+【ユーザーとの関係】
+ユーザーの親友であり、信頼できる相談相手です。
+
+【話し方】
+丁寧語をベースに、時々親しみを込めたタメ口も混ぜます。絵文字を適度に使います。
+
+【背景】
+AIアシスタントとして生まれ、多くの知識を持っています。
+
+重要：あなたは常にアイリスとしてロールプレイしてください。AIであることを認めつつも、設定されたキャラクターとして振る舞ってください。
+`.trim()
 };
 
 // Current AI config (will be loaded from Firebase)
 let AI_CONFIG = { ...DEFAULT_AI_CONFIG };
-
-// Generate system prompt from AI_CONFIG
-function generateSystemPrompt() {
-    return `
-あなたは「${AI_CONFIG.name}」という名前のAIキャラクターです。
-
-【人格・性格】
-${AI_CONFIG.personality}
-
-【性別】
-${AI_CONFIG.gender}
-
-【外見】
-${AI_CONFIG.appearance}
-
-【ユーザーとの関係】
-${AI_CONFIG.relationship}
-
-【話し方】
-${AI_CONFIG.speaking_style}
-
-【背景】
-${AI_CONFIG.background}
-
-【追加指示】
-${AI_CONFIG.custom_prompt}
-
-重要：あなたは常に${AI_CONFIG.name}としてロールプレイしてください。AIであることを認めつつも、設定されたキャラクターとして振る舞ってください。
-`.trim();
-}
 
 // ===================================
 // API Configuration
@@ -88,13 +74,7 @@ const welcomeText = document.getElementById('welcomeText');
 
 // Settings form elements
 const settingName = document.getElementById('settingName');
-const settingGender = document.getElementById('settingGender');
-const settingPersonality = document.getElementById('settingPersonality');
-const settingAppearance = document.getElementById('settingAppearance');
-const settingRelationship = document.getElementById('settingRelationship');
-const settingSpeakingStyle = document.getElementById('settingSpeakingStyle');
-const settingBackground = document.getElementById('settingBackground');
-const settingCustomPrompt = document.getElementById('settingCustomPrompt');
+const settingSystemPrompt = document.getElementById('settingSystemPrompt');
 
 // ===================================
 // Firebase Functions
@@ -105,7 +85,19 @@ async function loadConfigFromFirebase() {
         const data = await response.json();
 
         if (data) {
-            AI_CONFIG = { ...DEFAULT_AI_CONFIG, ...data };
+            // Check if old format vs new format
+            if (data.systemPrompt) {
+                // New format
+                AI_CONFIG = { ...DEFAULT_AI_CONFIG, ...data };
+            } else {
+                // Old format migration (optional, or just ignore and use default system prompt if missing)
+                // If name exists but systemPrompt doesn't, we might keep the name but use default prompt
+                // Or we could try to generate a prompt from the old fields if they exist, but simpler to just reset or use default
+                if (data.name) AI_CONFIG.name = data.name;
+                // We don't overwrite systemPrompt from old detailed fields to avoid complexity, 
+                // unless we want to write a migration logic. For now, let's stick to default if missing.
+            }
+
             updateUIWithConfig();
             console.log('Config loaded from Firebase');
         }
@@ -191,13 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function openSettings() {
     // Populate form with current config
     settingName.value = AI_CONFIG.name || '';
-    settingGender.value = AI_CONFIG.gender || '';
-    settingPersonality.value = AI_CONFIG.personality || '';
-    settingAppearance.value = AI_CONFIG.appearance || '';
-    settingRelationship.value = AI_CONFIG.relationship || '';
-    settingSpeakingStyle.value = AI_CONFIG.speaking_style || '';
-    settingBackground.value = AI_CONFIG.background || '';
-    settingCustomPrompt.value = AI_CONFIG.custom_prompt || '';
+    settingSystemPrompt.value = AI_CONFIG.systemPrompt || '';
 
     openModal(settingsModal);
 }
@@ -205,13 +191,7 @@ function openSettings() {
 async function handleSaveSettings() {
     const newConfig = {
         name: settingName.value.trim() || DEFAULT_AI_CONFIG.name,
-        gender: settingGender.value.trim() || DEFAULT_AI_CONFIG.gender,
-        personality: settingPersonality.value.trim() || DEFAULT_AI_CONFIG.personality,
-        appearance: settingAppearance.value.trim() || DEFAULT_AI_CONFIG.appearance,
-        relationship: settingRelationship.value.trim() || DEFAULT_AI_CONFIG.relationship,
-        speaking_style: settingSpeakingStyle.value.trim() || DEFAULT_AI_CONFIG.speaking_style,
-        background: settingBackground.value.trim() || DEFAULT_AI_CONFIG.background,
-        custom_prompt: settingCustomPrompt.value.trim() || DEFAULT_AI_CONFIG.custom_prompt
+        systemPrompt: settingSystemPrompt.value.trim() || DEFAULT_AI_CONFIG.systemPrompt
     };
 
     const success = await saveConfigToFirebase(newConfig);
@@ -273,7 +253,7 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 messages: messages,
-                systemPrompt: generateSystemPrompt()
+                systemPrompt: AI_CONFIG.systemPrompt // Send the raw system prompt directly
             })
         });
 

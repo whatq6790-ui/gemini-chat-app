@@ -124,37 +124,15 @@
             <div class="modal-body settings-body">
                 <div class="settings-form">
                     <div class="form-group">
-                        <label for="settingName">名前</label>
+                        <label for="settingName">名前（表示名）</label>
                         <input type="text" id="settingName" placeholder="AIの名前">
                     </div>
                     <div class="form-group">
-                        <label for="settingGender">性別</label>
-                        <input type="text" id="settingGender" placeholder="例：女性、男性、中性的">
+                        <label for="settingSystemPrompt">システムプロンプト（AIへの指示）</label>
+                        <textarea id="settingSystemPrompt" rows="10"
+                            placeholder="あなたは〇〇です。〜という口調で話してください。ユーザーは〜な人です。"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="settingPersonality">性格</label>
-                        <textarea id="settingPersonality" rows="2" placeholder="性格の説明"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="settingAppearance">外見</label>
-                        <textarea id="settingAppearance" rows="2" placeholder="外見の説明"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="settingRelationship">ユーザーとの関係</label>
-                        <input type="text" id="settingRelationship" placeholder="例：親友、恋人、助手">
-                    </div>
-                    <div class="form-group">
-                        <label for="settingSpeakingStyle">話し方</label>
-                        <textarea id="settingSpeakingStyle" rows="2" placeholder="話し方の特徴"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="settingBackground">背景設定</label>
-                        <textarea id="settingBackground" rows="2" placeholder="キャラクターの背景"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="settingCustomPrompt">カスタム指示</label>
-                        <textarea id="settingCustomPrompt" rows="3" placeholder="追加の指示やルール"></textarea>
-                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">※ここにAIの人格、話し方、行動指針などを自由に記述してください。</p>
                 </div>
             </div>
             <div class="modal-footer">
