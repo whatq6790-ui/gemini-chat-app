@@ -1,7 +1,12 @@
 // ===================================
-// AI Configuration - カスタマイズ可能な設定
+// Firebase Configuration
 // ===================================
-const AI_CONFIG = {
+const FIREBASE_DB_URL = 'https://gemini-chat-68984-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+// ===================================
+// AI Configuration - デフォルト値
+// ===================================
+const DEFAULT_AI_CONFIG = {
     name: "アイリス",
     personality: "明るく親切で、少しおちゃめな性格。ユーザーのことを大切に思っている。",
     gender: "女性",
@@ -9,12 +14,11 @@ const AI_CONFIG = {
     relationship: "ユーザーの親友であり、信頼できる相談相手。",
     speaking_style: "丁寧語をベースに、時々親しみを込めたタメ口も混ぜる。絵文字を適度に使う。",
     background: "AIアシスタントとして生まれ、多くの知識を持っている。",
-    custom_prompt: `
-        あなたは${this?.name || 'アイリス'}という名前のAIアシスタントです。
-        常にユーザーに寄り添い、楽しい会話を心がけてください。
-        質問には的確に答えつつ、温かみのある返答をしてください。
-    `
+    custom_prompt: "常にユーザーに寄り添い、楽しい会話を心がけてください。"
 };
+
+// Current AI config (will be loaded from Firebase)
+let AI_CONFIG = { ...DEFAULT_AI_CONFIG };
 
 // Generate system prompt from AI_CONFIG
 function generateSystemPrompt() {
@@ -67,23 +71,89 @@ const sendBtn = document.getElementById('sendBtn');
 const saveBtn = document.getElementById('saveBtn');
 const loadBtn = document.getElementById('loadBtn');
 const clearBtn = document.getElementById('clearBtn');
+const settingsBtn = document.getElementById('settingsBtn');
 const loadModal = document.getElementById('loadModal');
+const settingsModal = document.getElementById('settingsModal');
 const loadInput = document.getElementById('loadInput');
 const confirmLoad = document.getElementById('confirmLoad');
 const cancelLoad = document.getElementById('cancelLoad');
 const closeLoadModal = document.getElementById('closeLoadModal');
+const closeSettingsModal = document.getElementById('closeSettingsModal');
+const cancelSettings = document.getElementById('cancelSettings');
+const saveSettings = document.getElementById('saveSettings');
 const apiStatus = document.getElementById('apiStatus');
 const toast = document.getElementById('toast');
 const aiName = document.getElementById('aiName');
 const welcomeText = document.getElementById('welcomeText');
 
+// Settings form elements
+const settingName = document.getElementById('settingName');
+const settingGender = document.getElementById('settingGender');
+const settingPersonality = document.getElementById('settingPersonality');
+const settingAppearance = document.getElementById('settingAppearance');
+const settingRelationship = document.getElementById('settingRelationship');
+const settingSpeakingStyle = document.getElementById('settingSpeakingStyle');
+const settingBackground = document.getElementById('settingBackground');
+const settingCustomPrompt = document.getElementById('settingCustomPrompt');
+
+// ===================================
+// Firebase Functions
+// ===================================
+async function loadConfigFromFirebase() {
+    try {
+        const response = await fetch(`${FIREBASE_DB_URL}/ai_config.json`);
+        const data = await response.json();
+
+        if (data) {
+            AI_CONFIG = { ...DEFAULT_AI_CONFIG, ...data };
+            updateUIWithConfig();
+            console.log('Config loaded from Firebase');
+        }
+    } catch (error) {
+        console.error('Failed to load config from Firebase:', error);
+        // Use default config
+    }
+}
+
+async function saveConfigToFirebase(config) {
+    try {
+        const response = await fetch(`${FIREBASE_DB_URL}/ai_config.json`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(config)
+        });
+
+        if (response.ok) {
+            AI_CONFIG = config;
+            updateUIWithConfig();
+            showToast('設定を保存しました！', 'success');
+            return true;
+        } else {
+            throw new Error('Failed to save');
+        }
+    } catch (error) {
+        console.error('Failed to save config to Firebase:', error);
+        showToast('設定の保存に失敗しました', 'error');
+        return false;
+    }
+}
+
+function updateUIWithConfig() {
+    aiName.textContent = AI_CONFIG.name;
+    welcomeText.textContent = `私は${AI_CONFIG.name}です。何でもお気軽にお話しください。`;
+}
+
 // ===================================
 // Initialization
 // ===================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load config from Firebase first
+    await loadConfigFromFirebase();
+
     // Set AI name from config
-    aiName.textContent = AI_CONFIG.name;
-    welcomeText.textContent = `私は${AI_CONFIG.name}です。何でもお気軽にお話しください。`;
+    updateUIWithConfig();
 
     // Event listeners
     messageInput.addEventListener('input', handleInputChange);
@@ -92,13 +162,20 @@ document.addEventListener('DOMContentLoaded', () => {
     saveBtn.addEventListener('click', saveChat);
     loadBtn.addEventListener('click', () => openModal(loadModal));
     clearBtn.addEventListener('click', clearChat);
+    settingsBtn.addEventListener('click', openSettings);
     confirmLoad.addEventListener('click', loadChat);
     cancelLoad.addEventListener('click', () => closeModal(loadModal));
     closeLoadModal.addEventListener('click', () => closeModal(loadModal));
+    closeSettingsModal.addEventListener('click', () => closeModal(settingsModal));
+    cancelSettings.addEventListener('click', () => closeModal(settingsModal));
+    saveSettings.addEventListener('click', handleSaveSettings);
 
     // Close modal on overlay click
     loadModal.addEventListener('click', (e) => {
         if (e.target === loadModal) closeModal(loadModal);
+    });
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeModal(settingsModal);
     });
 
     // Auto-resize textarea
@@ -107,6 +184,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
 });
+
+// ===================================
+// Settings Modal Functions
+// ===================================
+function openSettings() {
+    // Populate form with current config
+    settingName.value = AI_CONFIG.name || '';
+    settingGender.value = AI_CONFIG.gender || '';
+    settingPersonality.value = AI_CONFIG.personality || '';
+    settingAppearance.value = AI_CONFIG.appearance || '';
+    settingRelationship.value = AI_CONFIG.relationship || '';
+    settingSpeakingStyle.value = AI_CONFIG.speaking_style || '';
+    settingBackground.value = AI_CONFIG.background || '';
+    settingCustomPrompt.value = AI_CONFIG.custom_prompt || '';
+
+    openModal(settingsModal);
+}
+
+async function handleSaveSettings() {
+    const newConfig = {
+        name: settingName.value.trim() || DEFAULT_AI_CONFIG.name,
+        gender: settingGender.value.trim() || DEFAULT_AI_CONFIG.gender,
+        personality: settingPersonality.value.trim() || DEFAULT_AI_CONFIG.personality,
+        appearance: settingAppearance.value.trim() || DEFAULT_AI_CONFIG.appearance,
+        relationship: settingRelationship.value.trim() || DEFAULT_AI_CONFIG.relationship,
+        speaking_style: settingSpeakingStyle.value.trim() || DEFAULT_AI_CONFIG.speaking_style,
+        background: settingBackground.value.trim() || DEFAULT_AI_CONFIG.background,
+        custom_prompt: settingCustomPrompt.value.trim() || DEFAULT_AI_CONFIG.custom_prompt
+    };
+
+    const success = await saveConfigToFirebase(newConfig);
+    if (success) {
+        closeModal(settingsModal);
+    }
+}
 
 // ===================================
 // Message Handling

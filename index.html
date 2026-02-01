@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
@@ -7,16 +8,19 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="description" content="Gemini AI搭載のインテリジェントチャットアプリ">
-    
+
     <title>Gemini AI Chat</title>
-    
+
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text y='.9em' font-size='80' x='10'>💬</text></svg>">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text y='.9em' font-size='80' x='10'>💬</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Header -->
@@ -35,18 +39,26 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="icon-btn" id="settingsBtn" title="人格設定">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </button>
                 <button class="icon-btn" id="loadBtn" title="履歴を読み込む">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                 </button>
                 <button class="icon-btn" id="saveBtn" title="履歴を保存">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                 </button>
                 <button class="icon-btn" id="clearBtn" title="会話をクリア">
@@ -70,12 +82,7 @@
         <!-- Input Area -->
         <footer class="chat-input-area">
             <div class="input-container">
-                <textarea 
-                    id="messageInput" 
-                    placeholder="メッセージを入力..." 
-                    rows="1"
-                    maxlength="10000"
-                ></textarea>
+                <textarea id="messageInput" placeholder="メッセージを入力..." rows="1" maxlength="10000"></textarea>
                 <button class="send-btn" id="sendBtn" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -107,9 +114,60 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal settings-modal">
+            <div class="modal-header">
+                <h3>⚙️ AI人格設定</h3>
+                <button class="modal-close" id="closeSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body settings-body">
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="settingName">名前</label>
+                        <input type="text" id="settingName" placeholder="AIの名前">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingGender">性別</label>
+                        <input type="text" id="settingGender" placeholder="例：女性、男性、中性的">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingPersonality">性格</label>
+                        <textarea id="settingPersonality" rows="2" placeholder="性格の説明"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingAppearance">外見</label>
+                        <textarea id="settingAppearance" rows="2" placeholder="外見の説明"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingRelationship">ユーザーとの関係</label>
+                        <input type="text" id="settingRelationship" placeholder="例：親友、恋人、助手">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingSpeakingStyle">話し方</label>
+                        <textarea id="settingSpeakingStyle" rows="2" placeholder="話し方の特徴"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingBackground">背景設定</label>
+                        <textarea id="settingBackground" rows="2" placeholder="キャラクターの背景"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingCustomPrompt">カスタム指示</label>
+                        <textarea id="settingCustomPrompt" rows="3" placeholder="追加の指示やルール"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSettings">キャンセル</button>
+                <button class="btn btn-primary" id="saveSettings">保存</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
     <script src="app.js"></script>
 </body>
+
 </html>

@@ -7,27 +7,27 @@
     --bg-secondary: #1a1a2e;
     --bg-tertiary: #252542;
     --bg-glass: rgba(30, 30, 50, 0.7);
-    
+
     --accent-primary: #6c5ce7;
     --accent-secondary: #a29bfe;
     --accent-gradient: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
-    
+
     --text-primary: #ffffff;
     --text-secondary: #b8b8d1;
     --text-muted: #6c6c8a;
-    
+
     --user-bubble: linear-gradient(135deg, #6c5ce7 0%, #8b7cf7 100%);
     --ai-bubble: rgba(40, 40, 65, 0.9);
-    
+
     --border-color: rgba(108, 92, 231, 0.2);
     --glow-color: rgba(108, 92, 231, 0.4);
-    
+
     /* Spacing */
     --safe-area-top: env(safe-area-inset-top, 0px);
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
     --safe-area-left: env(safe-area-inset-left, 0px);
     --safe-area-right: env(safe-area-inset-right, 0px);
-    
+
     /* Animations */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.3s ease;
@@ -80,7 +80,7 @@ body {
     width: 200%;
     height: 200%;
     background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(162, 155, 254, 0.08) 0%, transparent 50%);
+        radial-gradient(circle at 70% 80%, rgba(162, 155, 254, 0.08) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
 }
@@ -130,8 +130,17 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(1.1); }
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: scale(1.1);
+    }
 }
 
 .avatar-icon {
@@ -226,8 +235,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .welcome-avatar {
@@ -236,8 +252,15 @@ body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .welcome-message h2 {
@@ -264,8 +287,15 @@ body {
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message.user {
@@ -333,13 +363,29 @@ body {
     animation: bounce 1.4s ease-in-out infinite;
 }
 
-.typing-indicator span:nth-child(1) { animation-delay: 0s; }
-.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-8px); }
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-8px);
+    }
 }
 
 /* ===================================
@@ -632,13 +678,13 @@ body {
     .message {
         max-width: 90%;
     }
-    
+
     .message-avatar {
         width: 28px;
         height: 28px;
         font-size: 12px;
     }
-    
+
     .message-bubble {
         padding: 10px 14px;
         font-size: 0.9rem;
@@ -649,17 +695,19 @@ body {
    iOS Specific Fixes
    =================================== */
 @supports (-webkit-touch-callout: none) {
+
     /* iOS Safari specific styles */
     .app-container {
         height: -webkit-fill-available;
     }
-    
+
     .chat-messages {
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .input-container textarea {
-        font-size: 16px; /* Prevent zoom on focus */
+        font-size: 16px;
+        /* Prevent zoom on focus */
     }
 }
 
@@ -674,13 +722,96 @@ body {
         padding-top: 8px;
         padding-bottom: 8px;
     }
-    
+
     .ai-avatar {
         width: 36px;
         height: 36px;
     }
-    
+
     .welcome-message {
         padding: 20px;
+    }
+}
+
+/* ===================================
+   Settings Modal
+   =================================== */
+.settings-modal {
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-body {
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 16px 20px;
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--glow-color);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+@media (max-width: 480px) {
+    .settings-modal {
+        max-height: 85vh;
+    }
+
+    .settings-body {
+        max-height: 55vh;
+    }
+
+    .header-actions {
+        gap: 4px;
+    }
+
+    .icon-btn {
+        width: 36px;
+        height: 36px;
     }
 }
