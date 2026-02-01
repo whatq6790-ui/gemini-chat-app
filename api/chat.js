@@ -1,112 +1,116 @@
-export default async function handler(req, res) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export const config = {
+    runtime: 'edge', // Edge Runtime for faster cold starts
+};
 
+// Groq API Configuration
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const MODEL_NAME = 'llama-3.3-70b-versatile';
+
+export default async function handler(req) {
+    // CORS headers
+    const corsHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+    };
+
+    // Handle OPTIONS request
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        return new Response(null, { status: 200, headers: corsHeaders });
     }
 
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+            status: 405,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
     }
 
-    // Get all API keys from environment variables
-    const apiKeys = [
-        process.env.GEMINI_API_KEY_1,
-        process.env.GEMINI_API_KEY_2,
-        process.env.GEMINI_API_KEY_3,
-        process.env.GEMINI_API_KEY_4,
-        process.env.GEMINI_API_KEY_5,
-    ].filter(key => key && key.trim() !== '');
+    try {
+        const { messages, systemPrompt } = await req.json();
 
-    if (apiKeys.length === 0) {
-        return res.status(500).json({ error: 'No API keys configured' });
-    }
+        // Construct messages array for OpenAI-compatible API
+        // Groq/OpenAI expects system prompt as the first message with role 'system'
+        const apiMessages = [
+            { role: 'system', content: systemPrompt },
+            ...messages.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.content
+            }))
+        ];
 
-    const { messages, systemPrompt } = req.body;
+        // Try API keys sequentially
+        let lastError = null;
 
-    if (!messages || !Array.isArray(messages)) {
-        return res.status(400).json({ error: 'Invalid messages format' });
-    }
+        // Loop through GROQ_API_KEY_1 to GROQ_API_KEY_5
+        for (let i = 1; i <= 5; i++) {
+            const apiKey = process.env[`GROQ_API_KEY_${i}`];
+            if (!apiKey) continue;
 
-    // Try each API key until one works
-    let lastError = null;
-    
-    for (let i = 0; i < apiKeys.length; i++) {
-        const apiKey = apiKeys[i];
-        
-        try {
-            const response = await callGeminiAPI(apiKey, messages, systemPrompt);
-            
-            if (response.ok) {
-                const data = await response.json();
-                return res.status(200).json({
-                    success: true,
-                    keyIndex: i + 1,
-                    data: data
+            try {
+                const response = await fetch(GROQ_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: apiMessages,
+                        temperature: 0.7, // Creative but stable
+                        max_tokens: 4096, // Large context window
+                        top_p: 1,
+                        stream: false
+                    })
                 });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return new Response(JSON.stringify({
+                        success: true,
+                        data: data,
+                        keyIndex: i
+                    }), {
+                        status: 200,
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                    });
+                }
+
+                // If rate limited (429), continue to next key
+                if (response.status === 429) {
+                    console.warn(`API Key ${i} rate limited. Trying next key...`);
+                    lastError = `Rate limit exceeded on key ${i}`;
+                    continue;
+                }
+
+                // Other errors
+                const errorData = await response.text();
+                console.error(`API Key ${i} error:`, errorData);
+                lastError = `API Error: ${response.status} ${response.statusText}`;
+
+            } catch (error) {
+                console.error(`API Key ${i} exception:`, error);
+                lastError = error.message;
             }
-            
-            // Check if rate limited (429)
-            if (response.status === 429) {
-                console.log(`API key ${i + 1} rate limited, trying next...`);
-                lastError = { status: 429, message: `API key ${i + 1} rate limited` };
-                continue;
-            }
-            
-            // Other error
-            const errorData = await response.json();
-            lastError = { status: response.status, message: errorData.error?.message || 'Unknown error' };
-            
-        } catch (error) {
-            console.error(`Error with API key ${i + 1}:`, error.message);
-            lastError = { status: 500, message: error.message };
         }
+
+        // If all keys failed
+        return new Response(JSON.stringify({
+            success: false,
+            error: lastError || 'All API keys failed or rate limited.'
+        }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+
+    } catch (error) {
+        console.error('Server error:', error);
+        return new Response(JSON.stringify({
+            success: false,
+            error: error.message
+        }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
     }
-
-    // All keys exhausted
-    return res.status(429).json({
-        error: 'All API keys exhausted',
-        details: lastError
-    });
-}
-
-async function callGeminiAPI(apiKey, messages, systemPrompt) {
-    const model = 'gemini-2.5-flash-lite';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-    // Convert messages to Gemini format
-    const contents = messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }]
-    }));
-
-    const requestBody = {
-        contents: contents,
-        systemInstruction: systemPrompt ? {
-            parts: [{ text: systemPrompt }]
-        } : undefined,
-        safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-        ],
-        generationConfig: {
-            temperature: 0.9,
-            topP: 0.95,
-            topK: 40,
-            maxOutputTokens: 8192,
-        }
-    };
-
-    return fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-    });
 }

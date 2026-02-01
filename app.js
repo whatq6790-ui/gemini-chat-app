@@ -269,10 +269,12 @@ async function sendMessage() {
         typingIndicator.remove();
 
         if (data.success) {
-            const aiResponse = data.data.candidates?.[0]?.content?.parts?.[0]?.text || 'すみません、応答を生成できませんでした。';
+            // Groq/OpenAI compatible response structure
+            const aiResponse = data.data.choices?.[0]?.message?.content || 'すみません、応答を生成できませんでした。';
+
             addMessage('ai', aiResponse);
             messages.push({ role: 'assistant', content: aiResponse });
-            updateApiStatus(`API Key ${data.keyIndex} 使用中`);
+            updateApiStatus(`API Key ${data.keyIndex} (Groq Llama 3)`);
 
             // Update compressed save code in background
             updateCompressedSaveCode();
