@@ -98,14 +98,14 @@
 
     <!-- Load Modal -->
     <div class="modal-overlay" id="loadModal">
-        <div class="modal">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3>履歴を読み込む</h3>
                 <button class="modal-close" id="closeLoadModal">&times;</button>
             </div>
             <div class="modal-body">
                 <p>保存したセーブコードを貼り付けてください：</p>
-                <textarea id="loadInput" placeholder="セーブコードを貼り付け..." rows="4"></textarea>
+                <textarea id="loadInput" class="settings-textarea" placeholder="セーブコードを貼り付け..." rows="6"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelLoad">キャンセル</button>
@@ -116,7 +116,7 @@
 
     <!-- Settings Modal -->
     <div class="modal-overlay" id="settingsModal">
-        <div class="modal settings-modal">
+        <div class="modal-content settings-modal">
             <div class="modal-header">
                 <h3>⚙️ AI人格設定</h3>
                 <button class="modal-close" id="closeSettingsModal">&times;</button>
@@ -125,11 +125,11 @@
                 <div class="settings-form">
                     <div class="form-group">
                         <label for="settingName">名前（表示名）</label>
-                        <input type="text" id="settingName" placeholder="AIの名前">
+                        <input type="text" id="settingName" class="settings-input" placeholder="AIの名前">
                     </div>
                     <div class="form-group">
                         <label for="settingSystemPrompt">システムプロンプト（AIへの指示）</label>
-                        <textarea id="settingSystemPrompt" rows="10"
+                        <textarea id="settingSystemPrompt" class="settings-textarea" rows="12"
                             placeholder="あなたは〇〇です。〜という口調で話してください。ユーザーは〜な人です。"></textarea>
                     </div>
                     <p style="font-size: 0.8rem; color: var(--text-muted);">※ここにAIの人格、話し方、行動指針などを自由に記述してください。</p>
