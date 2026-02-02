@@ -608,14 +608,22 @@ function loadFromLocalStorage() {
 // ===================================
 function openModal(modal) {
     modal.classList.remove('hidden');
-    // Ensure animation plays if possible, primarily relies on CSS transitions if displayed block
-    // but here we toggle hidden. The CSS animation 'pop-anim' on the content will run on display.
+    // Force reflow to enable transition if it was display:none
+    void modal.offsetWidth;
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal(modal) {
-    modal.classList.add('hidden');
+    modal.classList.remove('active');
     document.body.style.overflow = '';
+
+    // Wait for transition to finish before hiding (300ms matches CSS)
+    setTimeout(() => {
+        if (!modal.classList.contains('active')) {
+            modal.classList.add('hidden');
+        }
+    }, 300);
 }
 
 // ===================================
