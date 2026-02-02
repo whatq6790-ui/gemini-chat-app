@@ -151,30 +151,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateUIWithConfig();
 
     // Event listeners
-    messageInput.addEventListener('input', handleInputChange);
-    messageInput.addEventListener('keydown', handleKeyDown);
-    sendBtn.addEventListener('click', sendMessage);
-    saveBtn.addEventListener('click', saveChat);
-    loadBtn.addEventListener('click', () => openModal(loadModal));
-    clearBtn.addEventListener('click', clearChat);
-    settingsBtn.addEventListener('click', openSettings);
-    confirmLoad.addEventListener('click', loadChat);
-    cancelLoad.addEventListener('click', () => closeModal(loadModal));
-    closeLoadModal.addEventListener('click', () => closeModal(loadModal));
-    closeSettingsModal.addEventListener('click', () => closeModal(settingsModal));
-    cancelSettings.addEventListener('click', () => closeModal(settingsModal));
-    saveSettings.addEventListener('click', handleSaveSettings);
+    // Event listeners - Safe attachment
+    if (messageInput) {
+        messageInput.addEventListener('input', handleInputChange);
+        messageInput.addEventListener('keydown', handleKeyDown);
+        // Auto-resize textarea
+        messageInput.addEventListener('input', autoResizeTextarea);
+
+        messageInput.addEventListener('focus', () => {
+            document.body.classList.add('keyboard-open');
+        });
+        messageInput.addEventListener('blur', () => {
+            document.body.classList.remove('keyboard-open');
+        });
+    }
+
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (saveBtn) saveBtn.addEventListener('click', saveChat);
+    if (loadBtn) loadBtn.addEventListener('click', () => openModal(loadModal));
+    if (clearBtn) clearBtn.addEventListener('click', clearChat);
+    if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
+
+    if (confirmLoad) confirmLoad.addEventListener('click', loadChat);
+    if (cancelLoad) cancelLoad.addEventListener('click', () => closeModal(loadModal));
+    if (closeLoadModal) closeLoadModal.addEventListener('click', () => closeModal(loadModal));
+
+    if (closeSettingsModal) closeSettingsModal.addEventListener('click', () => closeModal(settingsModal));
+    if (cancelSettings) cancelSettings.addEventListener('click', () => closeModal(settingsModal));
+    if (saveSettings) saveSettings.addEventListener('click', handleSaveSettings);
 
     // Close modal on overlay click
-    loadModal.addEventListener('click', (e) => {
-        if (e.target === loadModal) closeModal(loadModal);
-    });
-    settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) closeModal(settingsModal);
-    });
+    if (loadModal) {
+        loadModal.addEventListener('click', (e) => {
+            if (e.target === loadModal) closeModal(loadModal);
+        });
+    }
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) closeModal(settingsModal);
+        });
+    }
 
-    // Auto-resize textarea
-    messageInput.addEventListener('input', autoResizeTextarea);
+
 
     // Keyboard handling for mobile
     // Note: 'keyboard-open' class toggling moved to visualViewport logic or separate check if needed,
@@ -218,12 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Keyboard open/close class toggle
     // Redefining listeners as per request, ensuring they exist
-    messageInput.addEventListener('focus', () => {
-        document.body.classList.add('keyboard-open');
-    });
-    messageInput.addEventListener('blur', () => {
-        document.body.classList.remove('keyboard-open');
-    });
+
 
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
