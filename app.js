@@ -179,29 +179,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     messageInput.addEventListener('input', autoResizeTextarea);
 
     // Keyboard handling for mobile
-    messageInput.addEventListener('focus', () => document.body.classList.add('keyboard-open'));
-    messageInput.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
+    messageInput.addEventListener('focus', () => {
+        document.body.classList.add('keyboard-open');
+        // Scroll to bottom after keyboard animation
+        setTimeout(() => scrollToBottom(), 300);
+    });
+    messageInput.addEventListener('blur', () => {
+        document.body.classList.remove('keyboard-open');
+    });
 
     // iOS PWA keyboard handling using visualViewport
-    const chatInputArea = document.querySelector('.chat-input-area');
+    // This approach adjusts the visual viewport offset to keep input visible
+    if (window.visualViewport) {
+        const appContainer = document.querySelector('.app-container');
+        let pendingUpdate = false;
 
-    if (window.visualViewport && chatInputArea) {
         const handleViewportChange = () => {
-            // Calculate offset from bottom of layout viewport to bottom of visual viewport
-            const offsetBottom = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
+            if (pendingUpdate) return;
+            pendingUpdate = true;
 
-            if (offsetBottom > 0) {
-                // Keyboard is open - move input area up
-                chatInputArea.style.transform = `translateY(-${offsetBottom}px)`;
-                setTimeout(() => scrollToBottom(), 50);
-            } else {
-                // Keyboard is closed
-                chatInputArea.style.transform = '';
-            }
+            requestAnimationFrame(() => {
+                pendingUpdate = false;
+
+                // Calculate keyboard height
+                const keyboardHeight = window.innerHeight - window.visualViewport.height;
+
+                if (keyboardHeight > 50 && appContainer) {
+                    // Keyboard is visible - adjust app container height
+                    appContainer.style.height = `${window.visualViewport.height}px`;
+                    appContainer.style.paddingBottom = '0';
+
+                    // Scroll to keep input visible
+                    setTimeout(() => {
+                        scrollToBottom();
+                        // Ensure input stays in view
+                        messageInput.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    }, 50);
+                } else if (appContainer) {
+                    // Keyboard is hidden - reset
+                    appContainer.style.height = '';
+                    appContainer.style.paddingBottom = '';
+                }
+            });
         };
 
         window.visualViewport.addEventListener('resize', handleViewportChange);
-        window.visualViewport.addEventListener('scroll', handleViewportChange);
     }
 
     // Load saved messages from localStorage (optional)
