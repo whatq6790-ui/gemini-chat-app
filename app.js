@@ -125,7 +125,7 @@ async function saveConfigToFirebase(config) {
         if (response.ok) {
             AI_CONFIG = config;
             updateUIWithConfig();
-            showToast('設定を保存しました！', 'success');
+
             return true;
         } else {
             throw new Error('Failed to save');
@@ -502,7 +502,7 @@ function clearChat() {
         compressedSaveCode = '';
         renderMessages();
         saveToLocalStorage();
-        showToast('会話をクリアしました', 'success');
+
     }
 }
 
