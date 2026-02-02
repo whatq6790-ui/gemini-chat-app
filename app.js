@@ -182,6 +182,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     messageInput.addEventListener('focus', () => document.body.classList.add('keyboard-open'));
     messageInput.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
 
+    // visualViewport API for iOS PWA keyboard handling
+    if (window.visualViewport) {
+        const handleViewportResize = () => {
+            const keyboardHeight = window.innerHeight - window.visualViewport.height;
+            document.documentElement.style.setProperty('--keyboard-height', `${Math.max(0, keyboardHeight)}px`);
+
+            // Scroll to bottom when keyboard opens
+            if (keyboardHeight > 0) {
+                setTimeout(() => scrollToBottom(), 100);
+            }
+        };
+
+        window.visualViewport.addEventListener('resize', handleViewportResize);
+        window.visualViewport.addEventListener('scroll', handleViewportResize);
+    }
+
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
 });
