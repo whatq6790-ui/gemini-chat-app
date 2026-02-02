@@ -178,9 +178,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Auto-resize textarea
     messageInput.addEventListener('input', autoResizeTextarea);
 
+    // Keyboard handling for mobile
+    // Note: 'keyboard-open' class toggling moved to visualViewport logic or separate check if needed,
+    // but user requested specific logic which overwrites/updates current listeners.
+
     // iOS PWA keyboard handling using visualViewport
     if (window.visualViewport) {
         const appContainer = document.querySelector('.app-container');
+        const messageInput = document.getElementById('messageInput');
         let pendingUpdate = false;
 
         const handleViewportChange = () => {
@@ -214,6 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Keyboard open/close class toggle
+    // Redefining listeners as per request, ensuring they exist
     messageInput.addEventListener('focus', () => {
         document.body.classList.add('keyboard-open');
     });
