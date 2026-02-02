@@ -178,6 +178,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Auto-resize textarea
     messageInput.addEventListener('input', autoResizeTextarea);
 
+    // Keyboard handling for mobile
+    messageInput.addEventListener('focus', () => document.body.classList.add('keyboard-open'));
+    messageInput.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
+
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
 });

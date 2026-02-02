@@ -380,6 +380,15 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* Keyboard Open State (Mobile) */
+body.keyboard-open .input-footer {
+    display: none;
+}
+
+body.keyboard-open .chat-input-area {
+    padding-bottom: 12px;
+}
+
 /* ===================================
    Modals (Minimalist)
    =================================== */
