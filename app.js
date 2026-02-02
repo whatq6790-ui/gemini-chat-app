@@ -188,44 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.body.classList.remove('keyboard-open');
     });
 
-    // iOS PWA keyboard handling using visualViewport
-    // This approach adjusts the visual viewport offset to keep input visible
-    if (window.visualViewport) {
-        const appContainer = document.querySelector('.app-container');
-        let pendingUpdate = false;
-
-        const handleViewportChange = () => {
-            if (pendingUpdate) return;
-            pendingUpdate = true;
-
-            requestAnimationFrame(() => {
-                pendingUpdate = false;
-
-                // Calculate keyboard height
-                const keyboardHeight = window.innerHeight - window.visualViewport.height;
-
-                if (keyboardHeight > 50 && appContainer) {
-                    // Keyboard is visible - adjust app container height
-                    appContainer.style.height = `${window.visualViewport.height}px`;
-                    appContainer.style.paddingBottom = '0';
-
-                    // Scroll to keep input visible
-                    setTimeout(() => {
-                        scrollToBottom();
-                        // Ensure input stays in view
-                        messageInput.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                    }, 50);
-                } else if (appContainer) {
-                    // Keyboard is hidden - reset
-                    appContainer.style.height = '';
-                    appContainer.style.paddingBottom = '';
-                }
-            });
-        };
-
-        window.visualViewport.addEventListener('resize', handleViewportChange);
-    }
-
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
 });
