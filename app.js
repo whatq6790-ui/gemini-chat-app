@@ -183,20 +183,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     messageInput.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
 
     // visualViewport API for iOS PWA keyboard handling
+    const setAppHeight = () => {
+        // Use visualViewport height if available, otherwise use innerHeight
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty('--app-height', `${vh}px`);
+
+        // Also set keyboard height for additional adjustments
+        const keyboardHeight = window.innerHeight - vh;
+        document.documentElement.style.setProperty('--keyboard-height', `${Math.max(0, keyboardHeight)}px`);
+
+        // Scroll to bottom when keyboard opens
+        if (keyboardHeight > 50) {
+            setTimeout(() => scrollToBottom(), 50);
+        }
+    };
+
+    // Initial set
+    setAppHeight();
+
+    // Listen for viewport changes
     if (window.visualViewport) {
-        const handleViewportResize = () => {
-            const keyboardHeight = window.innerHeight - window.visualViewport.height;
-            document.documentElement.style.setProperty('--keyboard-height', `${Math.max(0, keyboardHeight)}px`);
-
-            // Scroll to bottom when keyboard opens
-            if (keyboardHeight > 0) {
-                setTimeout(() => scrollToBottom(), 100);
-            }
-        };
-
-        window.visualViewport.addEventListener('resize', handleViewportResize);
-        window.visualViewport.addEventListener('scroll', handleViewportResize);
+        window.visualViewport.addEventListener('resize', setAppHeight);
+        window.visualViewport.addEventListener('scroll', setAppHeight);
     }
+
+    // Fallback for devices without visualViewport
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setAppHeight, 100);
+    });
 
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
