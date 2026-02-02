@@ -251,6 +251,7 @@ async function handleSaveSettings() {
     const success = await saveConfigToFirebase(newConfig);
     if (success) {
         closeModal(settingsModal);
+        showToast('設定を保存しました！');
     }
 }
 
@@ -459,7 +460,7 @@ async function saveChat() {
         }
 
         await navigator.clipboard.writeText(saveCode);
-        showToast('セーブコードをコピーしました！', 'success');
+        showToast('セーブコードをコピーしました！');
     } catch (error) {
         console.error('Save error:', error);
         showToast('コピーに失敗しました', 'error');
@@ -513,7 +514,7 @@ async function loadChat() {
 
         closeModal(loadModal);
         loadInput.value = '';
-        showToast('履歴を読み込みました！', 'success');
+        showToast('履歴を読み込みました！');
 
     } catch (error) {
         console.error('Load error:', error);
@@ -551,7 +552,7 @@ function clearChat() {
         compressedSaveCode = '';
         renderMessages();
         saveToLocalStorage();
-
+        showToast('会話履歴をクリアしました！');
     }
 }
 
@@ -592,6 +593,37 @@ function openModal(modal) {
 function closeModal(modal) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
+}
+
+// ===================================
+// Toast Notification
+// ===================================
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.className = 'toast show'; // Reset classes
+
+    if (type === 'error') {
+        toast.style.borderLeft = '4px solid #ff453a';
+    } else {
+        toast.style.borderLeft = 'none';
+    }
+
+    // Clear visible timeout if exists
+    if (toast.timeoutId) {
+        clearTimeout(toast.timeoutId);
+    }
+
+    // Hide on click
+    const hideToast = () => {
+        toast.classList.remove('show');
+    };
+    toast.onclick = hideToast;
+
+    // Auto hide after 2 seconds
+    toast.timeoutId = setTimeout(hideToast, 2000);
 }
 
 // ===================================

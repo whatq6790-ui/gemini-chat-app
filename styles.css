@@ -418,6 +418,37 @@ body.keyboard-open .chat-input-area {
     }
 }
 
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(44, 44, 46, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 2000;
+    /* Higher than everything */
+    white-space: nowrap;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 /* ===================================
    Modals (Minimalist)
    =================================== */
@@ -433,7 +464,8 @@ body.keyboard-open .chat-input-area {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--transition);
-    z-index: 100;
+    z-index: 1000;
+    /* Increased to stay above chat input (200) */
 }
 
 .modal-overlay.active {
