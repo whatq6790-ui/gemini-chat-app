@@ -643,45 +643,39 @@ function closeModal(modal) {
 // Toast Notification
 // ===================================
 function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
+    const toastElem = document.getElementById('toast');
+    if (!toastElem) return;
 
-    toast.textContent = message;
-    toast.className = 'toast show'; // Reset classes
+    toastElem.textContent = message;
+    // Reset and add visible classes
+    toastElem.classList.remove('opacity-0', '-translate-y-4', 'scale-95');
+    toastElem.classList.add('opacity-100', 'translate-y-0', 'scale-100');
 
-    if (type === 'error') {
-        toast.style.borderLeft = '4px solid #ff453a';
-    } else {
-        toast.style.borderLeft = 'none';
+    // Clear existing timeout
+    if (toastElem.timeoutId) {
+        clearTimeout(toastElem.timeoutId);
     }
 
-    // Clear visible timeout if exists
-    if (toast.timeoutId) {
-        clearTimeout(toast.timeoutId);
-    }
-
-    // Hide on click
     const hideToast = () => {
-        toast.classList.remove('show');
+        toastElem.classList.add('opacity-0', '-translate-y-4', 'scale-95');
+        toastElem.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+        document.removeEventListener('click', hideToast);
+        document.removeEventListener('touchstart', hideToast);
     };
-    toast.onclick = hideToast;
+
+    // Hide on tap/click anywhere
+    setTimeout(() => {
+        document.addEventListener('click', hideToast, { once: true });
+        document.addEventListener('touchstart', hideToast, { once: true });
+    }, 10); // Slight delay to prevent immediate dismissal if the trigger button click bubbles up
 
     // Auto hide after 2 seconds
-    toast.timeoutId = setTimeout(hideToast, 2000);
+    toastElem.timeoutId = setTimeout(hideToast, 2000);
 }
 
 // ===================================
 // UI Helpers
 // ===================================
 function updateApiStatus(text) {
-    apiStatus.textContent = text;
-}
-
-function showToast(message, type = 'success') {
-    toast.textContent = message;
-    toast.className = `toast ${type} show`;
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
+    if (apiStatus) apiStatus.textContent = text;
 }
