@@ -182,36 +182,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     messageInput.addEventListener('focus', () => document.body.classList.add('keyboard-open'));
     messageInput.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
 
-    // visualViewport API for iOS PWA keyboard handling
-    const setAppHeight = () => {
-        // Use visualViewport height if available, otherwise use innerHeight
-        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        document.documentElement.style.setProperty('--app-height', `${vh}px`);
+    // iOS PWA keyboard handling using visualViewport
+    const chatInputArea = document.querySelector('.chat-input-area');
 
-        // Also set keyboard height for additional adjustments
-        const keyboardHeight = window.innerHeight - vh;
-        document.documentElement.style.setProperty('--keyboard-height', `${Math.max(0, keyboardHeight)}px`);
+    if (window.visualViewport && chatInputArea) {
+        const handleViewportChange = () => {
+            // Calculate offset from bottom of layout viewport to bottom of visual viewport
+            const offsetBottom = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
 
-        // Scroll to bottom when keyboard opens
-        if (keyboardHeight > 50) {
-            setTimeout(() => scrollToBottom(), 50);
-        }
-    };
+            if (offsetBottom > 0) {
+                // Keyboard is open - move input area up
+                chatInputArea.style.transform = `translateY(-${offsetBottom}px)`;
+                setTimeout(() => scrollToBottom(), 50);
+            } else {
+                // Keyboard is closed
+                chatInputArea.style.transform = '';
+            }
+        };
 
-    // Initial set
-    setAppHeight();
-
-    // Listen for viewport changes
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', setAppHeight);
-        window.visualViewport.addEventListener('scroll', setAppHeight);
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        window.visualViewport.addEventListener('scroll', handleViewportChange);
     }
-
-    // Fallback for devices without visualViewport
-    window.addEventListener('resize', setAppHeight);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(setAppHeight, 100);
-    });
 
     // Load saved messages from localStorage (optional)
     loadFromLocalStorage();
