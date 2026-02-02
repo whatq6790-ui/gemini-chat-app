@@ -57,8 +57,8 @@ export default async function handler(req) {
                     body: JSON.stringify({
                         model: MODEL_NAME,
                         messages: apiMessages,
-                        temperature: 0.7, // Creative but stable
-                        max_tokens: 4096, // Large context window
+                        temperature: systemPrompt.temperature || 0.95, // Higher default for creativity/bypass
+                        max_tokens: 8192, // Max context window
                         top_p: 1,
                         stream: false
                     })
