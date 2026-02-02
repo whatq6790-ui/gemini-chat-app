@@ -309,6 +309,7 @@ body {
     padding-bottom: max(12px, env(safe-area-inset-bottom));
     border-top: 0.5px solid var(--border-color);
     z-index: 200;
+    touch-action: manipulation;
 }
 
 .input-container {
@@ -363,6 +364,7 @@ body {
     transition: transform var(--transition), opacity var(--transition);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
 }
 
 .send-btn:disabled {

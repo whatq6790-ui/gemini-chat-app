@@ -178,11 +178,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Auto-resize textarea
     messageInput.addEventListener('input', autoResizeTextarea);
 
-    // Keyboard handling for mobile
+    // iOS PWA keyboard handling using visualViewport
+    if (window.visualViewport) {
+        const appContainer = document.querySelector('.app-container');
+        let pendingUpdate = false;
+
+        const handleViewportChange = () => {
+            if (pendingUpdate) return;
+            pendingUpdate = true;
+
+            requestAnimationFrame(() => {
+                pendingUpdate = false;
+
+                // Calculate keyboard height
+                const keyboardHeight = window.innerHeight - window.visualViewport.height;
+
+                if (keyboardHeight > 50 && appContainer) {
+                    // Keyboard is visible - adjust app container
+                    appContainer.style.height = `${window.visualViewport.height}px`;
+                    appContainer.style.paddingBottom = '0';
+
+                    // Scroll to keep input visible
+                    setTimeout(() => {
+                        messageInput.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    }, 50);
+                } else if (appContainer) {
+                    // Keyboard is hidden - reset
+                    appContainer.style.height = '';
+                    appContainer.style.paddingBottom = '';
+                }
+            });
+        };
+
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+    }
+
+    // Keyboard open/close class toggle
     messageInput.addEventListener('focus', () => {
         document.body.classList.add('keyboard-open');
-        // Scroll to bottom after keyboard animation
-        setTimeout(() => scrollToBottom(), 300);
     });
     messageInput.addEventListener('blur', () => {
         document.body.classList.remove('keyboard-open');
