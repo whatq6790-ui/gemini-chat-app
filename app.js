@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // iOS PWA keyboard handling using visualViewport
     if (window.visualViewport) {
-        const appContainer = document.querySelector('.app-container');
+        const appContainer = document.getElementById('app');
         const messageInput = document.getElementById('messageInput');
         let pendingUpdate = false;
 
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (keyboardHeight > 50 && appContainer) {
                     // Keyboard is visible - adjust app container
                     appContainer.style.height = `${window.visualViewport.height}px`;
-                    appContainer.style.paddingBottom = '0';
+                    // appContainer.style.paddingBottom = '0'; // Flex layout handles this automatically now
 
                     // Scroll to keep input visible
                     setTimeout(() => {
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else if (appContainer) {
                     // Keyboard is hidden - reset
                     appContainer.style.height = '';
-                    appContainer.style.paddingBottom = '';
+                    // appContainer.style.paddingBottom = '';
                 }
             });
         };
@@ -348,32 +348,50 @@ async function sendMessage() {
 
 function addMessage(role, content) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role}`;
+    const isUser = role === 'user';
 
-    const avatar = role === 'user' ? '👤' : '✨';
+    // Layout container with Pop animation
+    messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} w-full pop-anim items-end gap-2 mb-4`;
 
-    messageDiv.innerHTML = `
-        <div class="message-avatar">${avatar}</div>
-        <div class="message-bubble">${escapeHtml(content)}</div>
-    `;
+    if (!isUser) {
+        // AI Bubble (Hina Style - Dark Blue)
+        messageDiv.innerHTML = `
+            <div class="flex flex-col max-w-[90%]">
+                 <span class="text-[10px] text-[#3b82f6] ml-2 mb-1 font-bold italic opacity-80">${escapeHtml(AI_CONFIG.name || 'AI')}</span>
+                 <div class="p-4 bg-[#0f172a] border-2 border-[#172554] rounded-[20px_20px_20px_0px] text-[#3b82f6] text-sm font-bold leading-relaxed whitespace-pre-wrap shadow-sm">${escapeHtml(content)}</div>
+            </div>
+        `;
+    } else {
+        // User Bubble (Dark Blue Mode)
+        messageDiv.innerHTML = `
+            <div class="flex flex-col items-end max-w-[85%]">
+                 <span class="text-[10px] text-[#3b82f6] mr-2 mb-1 font-bold opacity-80">You</span>
+                 <div class="p-4 bg-[#3b82f6] text-white rounded-[20px_20px_0px_20px] text-sm font-bold shadow-lg shadow-blue-900/20 whitespace-pre-wrap">${escapeHtml(content)}</div>
+            </div>
+        `;
+    }
 
     chatMessages.appendChild(messageDiv);
-    scrollToBottom();
+    // requestAnimationFrame ensures the DOM is updated before scrolling
+    requestAnimationFrame(scrollToBottom);
 }
 
 function addTypingIndicator() {
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ai';
+    messageDiv.className = 'flex justify-start w-full pop-anim items-end gap-2 mb-4';
+
+    // Typing indicator with Dark Theme
     messageDiv.innerHTML = `
-        <div class="message-avatar">✨</div>
-        <div class="message-bubble">
-            <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+        <div class="flex flex-col max-w-[90%]">
+             <span class="text-[10px] text-[#3b82f6] ml-2 mb-1 font-bold italic opacity-80">${escapeHtml(AI_CONFIG.name || 'AI')}</span>
+             <div class="p-4 bg-[#0f172a] border-2 border-[#172554] rounded-[20px_20px_20px_0px] text-[#3b82f6] text-sm font-bold shadow-sm flex gap-2 items-center h-[54px]">
+                <div class="w-2 h-2 bg-[#3b82f6] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div class="w-2 h-2 bg-[#3b82f6] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div class="w-2 h-2 bg-[#3b82f6] rounded-full animate-bounce"></div>
+             </div>
         </div>
     `;
+
     chatMessages.appendChild(messageDiv);
     scrollToBottom();
     return messageDiv;
@@ -525,19 +543,21 @@ function renderMessages() {
     chatMessages.innerHTML = '';
 
     if (messages.length === 0) {
-        // Show welcome message
+        // Show welcome message (Dark Mode)
         chatMessages.innerHTML = `
-            <div class="welcome-message">
-                <div class="welcome-avatar">✨</div>
-                <h2>こんにちは！</h2>
-                <p id="welcomeText">私は${AI_CONFIG.name}です。何でもお気軽にお話しください。</p>
+            <div class="welcome-message flex flex-col items-center justify-center p-8 space-y-4 opacity-70 h-full">
+                <div class="w-20 h-20 rounded-full bg-[#0f172a] flex items-center justify-center border-2 border-[#3b82f6] text-4xl shadow-[0_0_20px_rgba(59,130,246,0.2)]">✨</div>
+                <div class="text-center space-y-2">
+                    <h2 class="text-[#3b82f6] font-black text-xl">こんにちは！</h2>
+                    <p id="welcomeText" class="text-slate-400 text-sm font-bold">私は${AI_CONFIG.name}です。何でもお気軽にお話しください。</p>
+                </div>
             </div>
         `;
     } else {
         // Render all messages
         for (const msg of messages) {
             const role = msg.role === 'user' ? 'user' : 'ai';
-            addMessage(role, msg.content);
+            addMessage(role, msg.content); // addMessage now handles styling
         }
     }
 }
@@ -583,13 +603,18 @@ function loadFromLocalStorage() {
 // ===================================
 // Modal Handling
 // ===================================
+// ===================================
+// Modal Handling
+// ===================================
 function openModal(modal) {
-    modal.classList.add('active');
+    modal.classList.remove('hidden');
+    // Ensure animation plays if possible, primarily relies on CSS transitions if displayed block
+    // but here we toggle hidden. The CSS animation 'pop-anim' on the content will run on display.
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal(modal) {
-    modal.classList.remove('active');
+    modal.classList.add('hidden');
     document.body.style.overflow = '';
 }
 
